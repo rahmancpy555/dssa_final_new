@@ -99,7 +99,7 @@ def login():
     s = cmd.fetchone()
     if s is not None:
         if s[3] == 'admin':
-            return ''' <script>  alert('login success'); window.location='/home'</script>'''
+            return ''' <script>  alert('login successfull'); window.location='/home'</script>'''
         if s[3] == 'user':
             return ''' <script>  alert('login success'); window.location='/userhome'</script>'''
         else:
