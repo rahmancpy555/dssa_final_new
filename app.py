@@ -4,6 +4,8 @@ from math import log
 import numpy as np
 
 import time
+
+from pip._vendor.requests import Session
 from sklearn.naive_bayes import MultinomialNB
 # import numpy as np
 from flask import *
@@ -39,7 +41,11 @@ def vl():
 
 @app.route('/userhome')
 def userhome():
-    return render_template('upload.html')
+    if 'user_name' in session:
+        return render_template('upload.html')
+    else:
+        return ''' <script> alert('You are not logged in to the website'); window.location='/'</script>'''
+   
 
 
 @app.route('/searchdocument')
@@ -49,7 +55,12 @@ def searchdocument():
 
 @app.route('/home')
 def home():
-    return render_template('adminhome.html')
+    if 'uname' in session:
+        return render_template('adminhome.html')
+    else:
+        return ''' <script> alert('You are not logged in to the website'); window.location='/'</script>'''
+
+
 
 
 @app.route('/registration')
@@ -59,25 +70,35 @@ def registration():
 
 @app.route('/adminaproval')
 def adminapproval():
-    return render_template('approval.html')
+    if 'uname' in session:
+        return render_template('approval.html')
+    else:
+        return ''' <script> alert('You are not logged in to the website'); window.location='/'</script>'''
 
 
 @app.route('/trendingarea')
 def trendingarea():
-    cmd.execute("SELECT * FROM domain")
-    s = cmd.fetchall()
-    return render_template('AddDomain.html', data=s)
+    if 'uname' in session:
+        cmd.execute("SELECT * FROM domain")
+        s = cmd.fetchall()
+        return render_template('AddDomain.html', data=s)
+    else:
+        return ''' <script> alert('You are not logged in to the website'); window.location='/'</script>'''
 
 
 
 @app.route('/adddataset')
 def adddataset():
-    cmd.execute("select * from domain")
-    s2 = cmd.fetchall()
-    cmd.execute(
-        "SELECT `domain`.*,`addfiles`.`file`,`addfiles`.`id` FROM `addfiles` JOIN `domain` ON `addfiles`.`did`=`domain`.`id`")
-    s3 = cmd.fetchall()
-    return render_template("AddDataset.html", val2=s2, val=s3)
+    if 'uname' in session:
+        cmd.execute("select * from domain")
+        s2 = cmd.fetchall()
+        cmd.execute(
+                    "SELECT `domain`.*,`addfiles`.`file`,`addfiles`.`id` FROM `addfiles` JOIN `domain` ON `addfiles`.`did`=`domain`.`id`")
+        s3 = cmd.fetchall()
+        return render_template("AddDataset.html", val2=s2, val=s3)
+    else:
+        return ''' <script> alert('You are not logged in to the website'); window.location='/'</script>'''
+    
 
 
 @app.route('/deletefile')
@@ -99,14 +120,32 @@ def login():
     s = cmd.fetchone()
     if s is not None:
         if s[3] == 'admin':
+            session['uname'] = 'user'
             return ''' <script>  alert('login successfull'); window.location='/home'</script>'''
         if s[3] == 'user':
+            session['user_name'] = 'user'
             return ''' <script>  alert('login success'); window.location='/userhome'</script>'''
         else:
             return ''' <script>  alert('login success but not approved'); window.location='/'</script>'''
 
     else:
         return ''' <script> alert('Invalid Username or Password'); window.location='/'</script>'''
+
+
+
+
+
+
+@app.route('/logout')
+def logout():
+    session.pop('uname', None)
+    session.pop('user_name', None)
+    return ''' <script> alert('log out successfully'); window.location='/'</script>'''
+
+
+
+
+
 
 
 @app.route('/trendingarea1', methods=['post'])
@@ -197,10 +236,13 @@ def userdetails():
 
 @app.route('/viewuserdetails')
 def viewuserdetails():
-    cmd.execute(
-        "select registration.*,login.* from registration,login where login.id=registration.login_id and login.type='pending'")
-    s = cmd.fetchall()
-    return render_template('approval.html', val=s)
+    if 'uname' in session:
+        cmd.execute(
+                    "select registration.*,login.* from registration,login where login.id=registration.login_id and login.type='pending'")
+        s = cmd.fetchall()
+        return render_template('approval.html', val=s)
+    else:
+        return ''' <script> alert('You are not logged in to the website'); window.location='/'</script>'''
 
 
 @app.route('/approveuser')
@@ -222,10 +264,14 @@ def rejectuser():
 
 @app.route('/viewapprovedusers')
 def viewapprovedusers():
-    cmd.execute(
-        "select registration.*,login.* from registration,login where login.id=registration.login_id and login.type='user'")
-    s = cmd.fetchall()
-    return render_template('viewapprovedusers.html', val=s)
+    if 'uname' in session:
+        cmd.execute(
+                    "select registration.*,login.* from registration,login where login.id=registration.login_id and login.type='user'")
+        s = cmd.fetchall()
+        return render_template('viewapprovedusers.html', val=s)
+    else:
+        return ''' <script> alert('You are not logged in to the website'); window.location='/'</script>'''
+    
 
 
 # path = r'C:\Users\Acer\PycharmProjects\documentsimilarity\src\static\useruploadfiles'
@@ -572,6 +618,9 @@ def similarity_check1(input_filename):
     dict_key_words = []
     class_names = []
     filenames_ds = []
+
+
+
     i = 0
     for dbitem in s:
         class_names.append(dbitem[0])
