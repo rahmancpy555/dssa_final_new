@@ -79,7 +79,7 @@ def adminapproval():
 @app.route('/trendingarea')
 def trendingarea():
     if 'uname' in session:
-        cmd.execute("SELECT * FROM domain")
+        cmd.execute("SELECT * FROM domain where domains !='uploaddocs'")
         s = cmd.fetchall()
         return render_template('AddDomain.html', data=s)
     else:
@@ -90,7 +90,7 @@ def trendingarea():
 @app.route('/adddataset')
 def adddataset():
     if 'uname' in session:
-        cmd.execute("select * from domain")
+        cmd.execute("SELECT * FROM domain where domains !='uploaddocs'")
         s2 = cmd.fetchall()
         cmd.execute(
                     "SELECT `domain`.*,`addfiles`.`file`,`addfiles`.`id` FROM `addfiles` JOIN `domain` ON `addfiles`.`did`=`domain`.`id`")
@@ -382,7 +382,7 @@ def read_docfile(input_file_name):
 def saveuserfile():
     file = request.files['file']
     file_name = secure_filename(file.filename)
-    file_name = os.path.join("./static/uploaddocs", file_name)
+    file_name = os.path.join("./static/New dataset/uploaddocs", file_name)
     file.save(file_name)
     ext= file_name.split('.')[-1]
     if ext !="pdf" and ext!="docx":
