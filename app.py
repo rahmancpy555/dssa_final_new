@@ -381,8 +381,8 @@ def read_docfile(input_file_name):
 @app.route('/saveuserfile', methods=['get', 'post'])
 def saveuserfile():
     file = request.files['file']
-    file_name = secure_filename(file.filename)
-    file_name = os.path.join("./static/New dataset/uploaddocs", file_name)
+    file_name_new = secure_filename(file.filename)
+    file_name = os.path.join("./static/New dataset/uploaddocs", file_name_new)
     file.save(file_name)
     ext= file_name.split('.')[-1]
     if ext !="pdf" and ext!="docx":
@@ -411,10 +411,20 @@ def saveuserfile():
         cn=dic[resultclass[0]]
 
 
+    if cn=='uploaddocs':
+         cn="no related class found in dataset"
+        
+
+
 
     result=[]
+    x=10
     for i in range(len(dsfiles)):
-        result.append([dsfiles[i], sim[i]])
+        if i >= x:
+            break
+        if dsfiles[i] != file_name_new:
+            result.append([dsfiles[i], sim[i]])
+        
 
     
 
